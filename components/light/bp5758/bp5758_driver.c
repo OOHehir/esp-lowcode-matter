@@ -186,6 +186,10 @@ int bp5758_driver_update_channels(void)
      * grayscale vs. current control. This is a functional implementation
      * that scales brightness values to the configured maximum current.
      * 
+     * Note: Individual I2C transactions are used for simplicity. If the
+     * BP5758 protocol supports batch updates, consider combining multiple
+     * channel updates into a single I2C transaction to reduce bus overhead.
+     * 
      * For production use, refer to the BP5758 datasheet for the exact
      * grayscale register addresses and update sequence.
      */
@@ -194,10 +198,11 @@ int bp5758_driver_update_channels(void)
         /* Scale PWM value (0-255) to current setting (0-0x1F)
          * This approach sets the current level to control brightness.
          * Actual BP5758 implementation may use separate grayscale registers.
+         * Using rounding to avoid precision loss: (value * max + 127) / 255
          */
         uint8_t cmd[2];
         cmd[0] = BP5758_REG_OUT1_CURRENT + i;
-        cmd[1] = s_channel_values[i] * BP5758_MAX_CURRENT / 255;
+        cmd[1] = (s_channel_values[i] * BP5758_MAX_CURRENT + 127) / 255;
         
         int ret = i2c_master_write_to_device(s_i2c_port, BP5758_I2C_ADDR, cmd, 2, -1);
         if (ret != 0) {

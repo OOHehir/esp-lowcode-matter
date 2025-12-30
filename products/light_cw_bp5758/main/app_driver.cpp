@@ -53,7 +53,7 @@ int app_driver_set_light_state(bool state)
 
 int app_driver_set_light_brightness(uint8_t brightness)
 {
-    brightness = brightness * 100 / 255;
+    brightness = (brightness * 100 + 127) / 255;
     printf("%s: Setting light brightness: %d\n", TAG, brightness);
     return light_driver_set_brightness(brightness);
 }
