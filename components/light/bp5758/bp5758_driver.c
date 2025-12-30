@@ -177,24 +177,27 @@ int bp5758_driver_update_channels(void)
         return -1;
     }
 
-    /* BP5758 uses grayscale registers to control brightness
-     * We need to write all 5 channel values in sequence
-     * The format is typically a multi-byte write starting from a specific register
-     * For simplicity, we'll write each channel individually to OUT registers
+    /* BP5758 protocol for updating grayscale (PWM) values:
+     * The BP5758 uses a specific command sequence to update output channels.
+     * After configuration, grayscale data is written to control LED brightness.
+     * 
+     * This implementation sends each channel's PWM value by writing to
+     * the device. The actual BP5758 may use a different register map for
+     * grayscale vs. current control. This is a functional implementation
+     * that scales brightness values to the configured maximum current.
+     * 
+     * For production use, refer to the BP5758 datasheet for the exact
+     * grayscale register addresses and update sequence.
      */
     
-    /* Write grayscale data to each channel
-     * This is a simplified implementation - actual BP5758 may require
-     * a specific command sequence for updating outputs
-     */
     for (int i = 0; i < BP5758_CHANNEL_COUNT; i++) {
-        /* Map PWM value (0-255) directly to channel output
-         * BP5758 typically uses the same register to write PWM data
-         * after configuration. This implementation uses a simple approach.
+        /* Scale PWM value (0-255) to current setting (0-0x1F)
+         * This approach sets the current level to control brightness.
+         * Actual BP5758 implementation may use separate grayscale registers.
          */
         uint8_t cmd[2];
-        cmd[0] = BP5758_REG_OUT1_CURRENT + i;  /* Reusing current registers as PWM registers */
-        cmd[1] = s_channel_values[i] * BP5758_MAX_CURRENT / 255;  /* Scale to max current */
+        cmd[0] = BP5758_REG_OUT1_CURRENT + i;
+        cmd[1] = s_channel_values[i] * BP5758_MAX_CURRENT / 255;
         
         int ret = i2c_master_write_to_device(s_i2c_port, BP5758_I2C_ADDR, cmd, 2, -1);
         if (ret != 0) {
@@ -208,19 +211,23 @@ int bp5758_driver_update_channels(void)
 
 int bp5758_driver_regist_channel(uint8_t channel, gpio_num_t gpio)
 {
-    /* For BP5758, we use this function to configure I2C pins
-     * The channel parameter is overloaded:
-     * - When called first time: gpio parameter contains SDA pin
-     * - When called second time: gpio parameter contains SCL pin
-     * This is a workaround since the light driver interface expects GPIO per channel
+    /* For BP5758, we use this function to configure I2C pins.
+     * The channel parameter explicitly identifies the pin type:
+     * - channel 0: SDA pin
+     * - channel 1: SCL pin
+     * 
+     * This is necessary because the light driver interface expects
+     * per-channel GPIO registration, but BP5758 uses I2C bus.
      */
     
-    if (s_sda_io == GPIO_NUM_NC) {
+    if (channel == 0) {
         s_sda_io = gpio;
-        printf("%s: Registered SDA pin: %d\n", TAG, gpio);
-    } else if (s_scl_io == GPIO_NUM_NC) {
+        printf("%s: Registered SDA pin (channel 0): GPIO%d\n", TAG, gpio);
+    } else if (channel == 1) {
         s_scl_io = gpio;
-        printf("%s: Registered SCL pin: %d\n", TAG, gpio);
+        printf("%s: Registered SCL pin (channel 1): GPIO%d\n", TAG, gpio);
+    } else {
+        printf("%s: Warning - unexpected channel %d for I2C pin registration\n", TAG, channel);
     }
     
     return 0;

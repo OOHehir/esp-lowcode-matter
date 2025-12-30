@@ -52,6 +52,8 @@ The BP5758 supports up to 5 channels, so this product can be extended to support
 * RGB mode (channels 0, 1, 2)
 * RGBCW mode (all 5 channels)
 
+> **Implementation Note**: The current driver implementation uses a simplified approach by controlling brightness through current adjustment. For production use with actual BP5758 hardware, you may need to refer to the BP5758 datasheet and adjust the register addresses and command sequences to match the specific chip variant you're using. The driver is designed to be easily adaptable to the actual hardware protocol.
+
 ## Understanding Code
 
 ### Initialization Sequence

@@ -77,8 +77,8 @@ int bp5758_driver_update_channels(void);
 /**
  * @brief Register channel with GPIO (for BP5758, this registers I2C pins)
  *
- * @param channel Channel type (not used for BP5758, I2C pins are set here)
- * @param gpio GPIO number (used as marker to pass I2C configuration)
+ * @param channel Pin type: 0 for SDA, 1 for SCL
+ * @param gpio GPIO number to use for the specified pin type
  * @return 0 on success, negative value on error
  */
 int bp5758_driver_regist_channel(uint8_t channel, gpio_num_t gpio);

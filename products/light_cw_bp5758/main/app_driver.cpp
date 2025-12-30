@@ -67,7 +67,7 @@ int app_driver_set_light_temperature(uint16_t temperature)
 
 int app_driver_event_handler(low_code_event_t *event)
 {
-    /* Get the events. Approriate indicators should be shown to the user based on the event. */
+    /* Get the events. Appropriate indicators should be shown to the user based on the event. */
     printf("%s: Received event: %d\n", TAG, event->event_type);
     light_effect_config_t effect_config = {
         .type = LIGHT_EFFECT_INVALID,
