@@ -9,6 +9,7 @@
 | low_code_transport      | Communication transport layer component for data exchange between the cores                                  |
 | sw_timer                | Software timer implementation for LP core with support for periodic and one-shot timers                      |
 | occupancy_sensor_ld2420 | Occupancy Sensor LD2420 component, uses UART driver for detecting occupancy                                  |
+| pressure_sensor_wsen_pdus | Pressure sensor component for the Würth Elektronik WSEN-PDUS using I2C driver, reporting pressure in 0.1 kPa units |
 | relay                   | GPIO based relay control driver component                                                                    |
 | system                  | System utilities component providing GPIO, timing, and basic system functions for LP core                    |
 | temperature_sensor_sht30 | Temperature sensor component for SHT30 using I2C driver for accurate ambient temperature readings           |
