@@ -2,7 +2,7 @@
 
 ESP LowCode for Matter helps you build [Matter](https://developer.espressif.com/blog/matter/) devices quickly and easily and in a very lightweight way.
 
-This is currently only supported on ESP32-C6. We are working on supporting other ESP32 series as well. Checkout more in [discussions](https://github.com/espressif/esp-lowcode-matter/discussions).
+This is currently only supported on ESP32-C6. We are working on supporting other ESP32 series as well. Checkout more in [discussions](https://github.com/OOHehir/esp-lowcode-matter/discussions).
 
 LowCode offers several key features that make the development and getting started quick and easy:
 
@@ -28,7 +28,7 @@ This will launch the web VS Code in the browser and get all the required depende
 
 ![Open Codespace](./docs/images/open_codespace.png)
 
-* Go to <https://github.com/espressif/esp-lowcode-matter/> and make sure you are logged in to GitHub
+* Go to <https://github.com/OOHehir/esp-lowcode-matter/> and make sure you are logged in to GitHub
 * Click on the green "Code" button -> Codespaces -> Create Codespace on Main (+)
 * This might take about **5 minutes** to setup
 * In the process, the codespace will **restart** a few times
