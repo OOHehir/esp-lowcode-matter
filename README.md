@@ -1,102 +1,109 @@
-# ESP LowCode: Matter
+# ESP LowCode Matter: Pressure Sensor
 
-ESP LowCode for Matter helps you build [Matter](https://developer.espressif.com/blog/matter/) devices quickly and easily and in a very lightweight way.
+A Matter-compatible differential pressure sensor built on [Espressif's ESP LowCode](https://github.com/espressif/esp-lowcode-matter) framework. This fork adds a **Würth Elektronik WSEN-PDUS** (±0.1 kPa) pressure sensing product to the LowCode product catalogue.
 
-This is currently only supported on ESP32-C6. We are working on supporting other ESP32 series as well. Checkout more in [discussions](https://github.com/OOHehir/esp-lowcode-matter/discussions).
+## What This Project Does
 
-LowCode offers several key features that make the development and getting started quick and easy:
+- Reads differential pressure from a WSEN-PDUS sensor over I2C every 5 seconds
+- Reports measurements to the Matter fabric via the Pressure Measurement cluster (0x0403)
+- Runs on an ESP32-C6 with the LowCode runtime (no full ESP-IDF application needed)
+- Supports commissioning into Apple Home, Google Home, Amazon Alexa, Home Assistant, Samsung SmartThings
 
-* No host setup required
-* Develop directly in your browser
-* Lightweight implementation with minimal overhead
-* Simple Arduino-like programming model for ease of use
-* Full Matter certification while maintaining simplicity
+## Hardware
 
-NOTE: ESP LowCode is currently in beta, and we are actively working to enhance its capabilities for production readiness.
+| Component  | Detail                                                                                              |
+|------------|-----------------------------------------------------------------------------------------------------|
+| **MCU**    | ESP32-C6 (ESP32-C6-MINI-1 module)                                                                   |
+| **Sensor** | [WSEN-PDUS](https://www.we-online.com/en/components/products/WSEN-PDUS) 2511020213301, ±0.1 kPa     |
+| **LED**    | Single-channel PWM (cold white) for status indication                                               |
+| **Button** | Boot button for factory reset (long press >5 s)                                                     |
 
-## Get Started
+### Pin Assignment
 
-With LowCode you can easily edit, build, flash and debug your device in the browser itself using GitHub [Codespaces](#open-codespace). It is basically VS Code in the browser.
+| Peripheral       | Signal | GPIO  |
+|------------------|--------|-------|
+| I2C (WSEN-PDUS)  | SCL    | GPIO1 |
+| I2C (WSEN-PDUS)  | SDA    | GPIO2 |
+| PWM LED          | Cold   | GPIO8 |
+| Button           | Input  | GPIO9 |
 
-> Codespaces for LowCode currently only works with Chromium based browsers such as Chrome, Edge, etc.
+> GPIOs can be changed via macros in [app_driver.cpp](products/pressure_sensor/main/app_driver.cpp).
 
-Alternatively, you can also develop using local [terminal](./docs/getting_started_terminal.md) or local [VS Code](./docs/getting_started_vscode.md) on your host machine.
+## Getting Started
 
-### Open Codespace
+This project uses the same LowCode development workflow as upstream. You can develop in the browser via GitHub Codespaces or locally.
 
-This will launch the web VS Code in the browser and get all the required dependencies, toolchains, repositories and setup the environment for you to start developing.
+### Codespace (Browser)
 
-![Open Codespace](./docs/images/open_codespace.png)
+> Requires a Chromium-based browser (Chrome, Edge, etc.)
 
-* Go to <https://github.com/OOHehir/esp-lowcode-matter/> and make sure you are logged in to GitHub
-* Click on the green "Code" button -> Codespaces -> Create Codespace on Main (+)
-* This might take about **5 minutes** to setup
-* In the process, the codespace will **restart** a few times
+1. Go to <https://github.com/OOHehir/esp-lowcode-matter/> and sign in to GitHub
+2. Click **Code** -> **Codespaces** -> **Create Codespace on Main (+)**
+3. Wait ~5 minutes for the environment to set up (it will restart a few times)
+4. Wait for the `LowCode is Ready` message in the terminal
 
-(Note: Although it uses and installs esp-idf and esp-amp, neither of them is added to the workspace.)
+### Local Development
 
-Now you should be able to see the full fledged VS Code. There should be files and folders present in the left panel and the terminal and the output windows on the bottom. There should also be a status bar at the bottom with some buttons for LowCode.
+- [Terminal setup](./docs/getting_started_terminal.md)
+- [VS Code setup](./docs/getting_started_vscode.md)
 
-### Start Development
+### Build & Flash
 
-Wait for the `LowCode is Ready` message in the terminal.
+Use the status bar buttons (left to right) or the command palette (`Ctrl/Cmd + Shift + P`, prefix `Lowcode:`):
 
-Out of the box, LowCode offers some products in `esp-lowcode-matter/products` folder. Start by clicking the "Select Product" button on the **bottom of the screen (status bar)**.
+1. **Select Product** -> choose `pressure_sensor`
+2. **Select Chip** -> ESP32-C6 + network type (WiFi or Thread)
+3. **Select Port** -> connect your board via USB
+4. **Prepare Device** -> erases flash and loads LowCode runtime
+5. **Upload Configuration** -> generates certificates and QR code
+6. **Upload Code** -> builds, flashes, and runs
 
-![Status Bar](./docs/images/status_bar.png)
+Your device is now a commissioned Matter pressure sensor.
 
-The subsequent development steps are aligned in a sequence of buttons to take you through the process. Just click on the buttons from left to right.
+## How It Works
 
-![Status Bar](./docs/images/status_bar_steps.png)
+### Matter Data Model
 
-There are also Codespaces commands (ctrl/cmd + shift + p) available with **"Lowcode:"** prefix for the same.
+| Field       | Value                         |
+|-------------|-------------------------------|
+| Device Type | Pressure Sensor (0x0305)      |
+| Cluster     | Pressure Measurement (0x0403) |
+| Attribute   | MeasuredValue (0x0000)        |
+| Unit        | 0.1 kPa (int16)               |
 
-* **Select Product**: Start by selecting the product that you want to create which will also open the product code
-* **Select Chip**: Select the chip and corresponding network type that you want to use with the product.
-* **Select Port**: Connect your **esp32c6** board to your computer via USB, and select the port. Refer [Port Permissions](./hardware_setup.md#port-permissions-for-usb-to-serial-converters) for OS specific instructions.
-* **Prepare Device**: This will erase the flash on the device and flash the prebuilt LowCode framework binaries to your esp32c6 board
-* **Upload Configuration**: This will generate the required device certificates and the qr code for the device and flash them to the device
-* **Upload Code**: This will build, flash and run the code on the device
+### Pressure Conversion
 
-Once you have followed these steps, you now have a fully functional Matter Product. You can directly start using this through Ecosystems like Amazon, Apple, Google, Home Assistant, Samsung: [Device setup and control](./docs/device_setup.md)
+The raw 14-bit ADC output maps to pressure as:
 
-## Next Steps
+```text
+P_Pa = (raw / 16383.0) x 200.0 - 100.0
+```
 
-Now that you have built and used one of the default products from this repository, you can start creating your own products.
+This yields ±100 Pa (±0.1 kPa). The Matter MeasuredValue is in 0.1 kPa units, so the reported range is [-1, 0, 1].
 
-* [Create and customize your own product](./docs/create_product.md)
-* [Product Configuration](./docs/product_configuration.md)
-* [Programmer's model](./docs/programmer_model.md)
-* [Debugging](./docs/debugging.md)
+### Code Structure
 
-## More
+```text
+products/pressure_sensor/
+  main/
+    app_main.cpp          # setup/loop entry point, callback registration
+    app_driver.cpp        # sensor init, periodic read, Matter reporting
+    app_priv.h            # shared declarations
+  configuration/          # ZAP data models (WiFi & Thread), certs
+components/
+  pressure_sensor_wsen_pdus/  # I2C driver for the WSEN-PDUS sensor
+```
 
-### Other Commands
+See the detailed [pressure sensor product README](products/pressure_sensor/README.md) for the full initialization sequence and extension guide.
 
-Some other commands (ctrl/cmd + shift + p) to help with development:
+## Upstream
 
-* **Build**: Build the selected product
-* **Flash**: Flash the built product to your esp32c6 board
-* **Console**: Open the device console to view the logs
-* **Erase Flash**: Erase the flash storage
-* **Menuconfig**: Open the menuconfig for the selected product
-* **Product Clean**: Clean the build system
+This is a fork of [espressif/esp-lowcode-matter](https://github.com/espressif/esp-lowcode-matter). The upstream project includes additional products (lights, sockets, temperature/occupancy sensors) and the full LowCode documentation:
 
-![commands](./docs/images/commands.png)
-
-### Other Solutions
-
-All of this is about ESP LowCode, but you can also checkout the following. Do you:
-
-* Need something even simpler with basic customization? You can use [ESP ZeroCode](https://zerocode.espressif.com/) instead. BTW, this is the fastest way to go to production and launch your product.
-* Need more flexibility and customization? You can use [ESP Matter](https://github.com/espressif/esp-matter) instead.
-
-Checkout the differences between all these solutions in the [comparison](./docs/matter_solutions.md).
-
-## Related Documents
-
-* [Device Setup](./docs/device_setup.md)
-* [Create LowCode Product](./docs/create_product.md)
-* [Matter Solutions](./docs/matter_solutions.md)
-* [Programmer's Model](./docs/programmer_model.md)
-* [All Documents](./docs/all_documents.md)
+- [Create a Product](./docs/create_product.md)
+- [Product Configuration](./docs/product_configuration.md)
+- [Programmer's Model](./docs/programmer_model.md)
+- [Debugging](./docs/debugging.md)
+- [Device Setup & Ecosystems](./docs/device_setup.md)
+- [Matter Solutions Comparison](./docs/matter_solutions.md)
+- [All Documents](./docs/all_documents.md)
