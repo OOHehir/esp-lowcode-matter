@@ -107,3 +107,7 @@ This is a fork of [espressif/esp-lowcode-matter](https://github.com/espressif/es
 - [Device Setup & Ecosystems](./docs/device_setup.md)
 - [Matter Solutions Comparison](./docs/matter_solutions.md)
 - [All Documents](./docs/all_documents.md)
+
+---
+
+Built by Owen O'Hehir — embedded Linux, IoT, Matter & Rust consulting at [electronicsconsult.com](https://electronicsconsult.com). Available for contract and consulting work.
